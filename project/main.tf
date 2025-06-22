@@ -4,10 +4,11 @@ resource "google_compute_network" "vpc" {
 }
 
 resource "google_compute_subnetwork" "subnet" {
-  name          = "webapp-subnet"
-  region        = var.region
-  network       = google_compute_network.vpc.id
-  ip_cidr_range = "10.10.0.0/24"
+  name                     = "webapp-subnet"
+  region                   = var.region
+  network                  = google_compute_network.vpc.id
+  ip_cidr_range            = "10.10.0.0/24"
+  private_ip_google_access = true
 }
 
 resource "google_compute_firewall" "allow-http" {
@@ -36,6 +37,20 @@ resource "google_compute_firewall" "allow-ssh" {
   target_tags   = ["web"]
 }
 
+resource "google_compute_router" "nat_router" {
+  name    = "web-nat-router"
+  region  = var.region
+  network = google_compute_network.vpc.name
+}
+
+resource "google_compute_router_nat" "nat" {
+  name                               = "web-nat-config"
+  router                             = google_compute_router.nat_router.name
+  region                             = var.region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+}
+
 resource "google_compute_instance_template" "web_template" {
   name_prefix  = "web-template"
   machine_type = "e2-medium"
@@ -49,7 +64,6 @@ resource "google_compute_instance_template" "web_template" {
 
   network_interface {
     subnetwork     = google_compute_subnetwork.subnet.id
-    access_config {}
   }
 
   metadata_startup_script = file("startup-script.sh")
