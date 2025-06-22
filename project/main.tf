@@ -21,7 +21,7 @@ resource "google_compute_firewall" "allow-http" {
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443"]
+    ports    = ["80"]
   }
 
   source_ranges = ["0.0.0.0/0"]
@@ -109,7 +109,7 @@ resource "google_compute_autoscaler" "web_autoscaler" {
     }
 
     load_balancing_utilization {
-      target = 0.6  # Target 60% of backend capacity
+      target = 0.6
     }
 
     cooldown_period = 60
@@ -134,29 +134,30 @@ resource "google_compute_url_map" "web_map" {
   default_service = google_compute_backend_service.web_backend.id
 }
 
-resource "google_compute_managed_ssl_certificate" "web_cert" {
-  name = "web-ssl-cert"
-
-  managed {
-    domains = [var.domain_name]
-  }
-}
-
-resource "google_compute_target_https_proxy" "https_proxy" {
-  name             = "web-https-proxy"
-  ssl_certificates = [google_compute_managed_ssl_certificate.web_cert.id]
-  url_map          = google_compute_url_map.web_map.id
+resource "google_compute_target_http_proxy" "http_proxy" {
+  name    = "web-http-proxy"
+  url_map = google_compute_url_map.web_map.id
 }
 
 resource "google_compute_global_address" "lb_ip" {
   name = "web-lb-ip"
 }
 
-resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {
-  name                  = "web-https-rule"
-  target                = google_compute_target_https_proxy.https_proxy.id
-  port_range            = "443"
+resource "google_compute_global_forwarding_rule" "http_forwarding_rule" {
+  name                  = "web-http-rule"
+  target                = google_compute_target_http_proxy.http_proxy.id
+  port_range            = "80"
   load_balancing_scheme = "EXTERNAL"
   ip_address            = google_compute_global_address.lb_ip.address
 }
 
+output "http_url" {
+  value = "http://${google_compute_global_address.lb_ip.address}"
+
+
+
+
+
+
+
+}
