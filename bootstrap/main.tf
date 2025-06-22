@@ -29,13 +29,11 @@ resource "google_project_iam_member" "terraform_sa_roles" {
     "roles/compute.networkAdmin",
     "roles/monitoring.viewer",
     "roles/iam.serviceAccountUser",
-    "roles/logging.logWriter"
+    "roles/logging.logWriter",
+    "roles/resourcemanager.projectCreator"
   ])
 
-  #roles/compute.admin	Full control over Compute Engine resources (instances, templates, MIGs, load balancers)
-  #roles/compute.networkAdmin	Manage networks, subnets, and firewalls
-  #roles/iam.serviceAccountUser	Attach service accounts (like vm_sa) to VMs and templates
-  #roles/monitoring.viewer	Needed if autoscaler or instance health policies inspect metrics
+
 
   project = google_project.project.project_id
   role    = each.key
@@ -51,5 +49,9 @@ resource "google_project_iam_member" "terraform_sa_roles" {
 #Enable APIs
 #
 #Create Terraform service account (and grant IAM roles)
+#roles/compute.admin	Full control over Compute Engine resources (instances, templates, MIGs, load balancers)
+#roles/compute.networkAdmin	Manage networks, subnets, and firewalls
+#roles/iam.serviceAccountUser	Attach service accounts (like vm_sa) to VMs and templates
+#roles/monitoring.viewer	Needed if autoscaler or instance health policies inspect metrics
 #
 #Output service account email & project ID
