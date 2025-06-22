@@ -32,7 +32,7 @@ resource "google_compute_firewall" "allow-ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["YOUR.IP.ADDRESS/32"]
+  source_ranges = ["YOUR.IP.ADDRESS/32"] # todo add command to get my ip address
   target_tags   = ["web"]
 }
 
