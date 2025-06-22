@@ -8,3 +8,4 @@ variable "zone" {
 variable "domain_name" {
   description = "Your fully qualified domain name (e.g. web.example.com)"
 }
+
