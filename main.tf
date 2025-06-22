@@ -1,0 +1,162 @@
+provider "google" {
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
+}
+
+resource "google_compute_network" "vpc" {
+  name = "webapp-vpc"
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "webapp-subnet"
+  region        = var.region
+  network       = google_compute_network.vpc.id
+  ip_cidr_range = "10.10.0.0/24"
+}
+
+resource "google_compute_firewall" "allow-http" {
+  name    = "allow-http"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["web"]
+}
+
+resource "google_compute_firewall" "allow-ssh" {
+  name    = "allow-ssh"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["YOUR.IP.ADDRESS/32"]
+  target_tags   = ["web"]
+}
+
+resource "google_compute_instance_template" "web_template" {
+  name_prefix  = "web-template"
+  machine_type = "e2-medium"
+  tags         = ["web"]
+
+  disk {
+    boot         = true
+    auto_delete  = true
+    source_image = "debian-cloud/debian-12"
+  }
+
+  network_interface {
+    subnetwork     = google_compute_subnetwork.subnet.id
+    access_config {}
+  }
+
+  metadata_startup_script = file("startup-script.sh")
+  metadata = {
+    enable-oslogin = "TRUE"
+  }
+}
+
+resource "google_compute_health_check" "hc" {
+  name = "web-health-check"
+
+  http_health_check {
+    port = 80
+  }
+
+  check_interval_sec  = 10
+  timeout_sec         = 5
+  healthy_threshold   = 2
+  unhealthy_threshold = 2
+}
+
+resource "google_compute_instance_group_manager" "web_mig" {
+  name               = "web-mig"
+  base_instance_name = "web"
+  zone               = var.zone
+  version {
+    instance_template = google_compute_instance_template.web_template.id
+  }
+
+  target_size = 2
+  named_port {
+    name = "http"
+    port = 80
+  }
+  auto_healing_policies {
+    health_check      = google_compute_health_check.hc.id
+    initial_delay_sec = 60
+  }
+}
+
+resource "google_compute_autoscaler" "web_autoscaler" {
+  name   = "web-autoscaler"
+  zone   = var.zone
+  target = google_compute_instance_group_manager.web_mig.id
+
+  autoscaling_policy {
+    max_replicas    = 5
+    min_replicas    = 2
+
+    cpu_utilization {
+      target = 0.6
+    }
+
+    load_balancing_utilization {
+      target = 0.6  # Target 60% of backend capacity
+    }
+
+    cooldown_period = 60
+  }
+}
+
+resource "google_compute_backend_service" "web_backend" {
+  name                  = "web-backend"
+  load_balancing_scheme = "EXTERNAL"
+  protocol              = "HTTP"
+  port_name             = "http"
+  health_checks         = [google_compute_health_check.hc.id]
+  timeout_sec           = 10
+
+  backend {
+    group = google_compute_instance_group_manager.web_mig.instance_group
+  }
+}
+
+resource "google_compute_url_map" "web_map" {
+  name            = "web-map"
+  default_service = google_compute_backend_service.web_backend.id
+}
+
+resource "google_compute_managed_ssl_certificate" "web_cert" {
+  name = "web-ssl-cert"
+
+  managed {
+    domains = [var.domain_name]
+  }
+}
+
+resource "google_compute_target_https_proxy" "https_proxy" {
+  name             = "web-https-proxy"
+  ssl_certificates = [google_compute_managed_ssl_certificate.web_cert.id]
+  url_map          = google_compute_url_map.web_map.id
+}
+
+resource "google_compute_global_address" "lb_ip" {
+  name = "web-lb-ip"
+}
+
+resource "google_compute_global_forwarding_rule" "https_forwarding_rule" {
+  name                  = "web-https-rule"
+  target                = google_compute_target_https_proxy.https_proxy.id
+  port_range            = "443"
+  load_balancing_scheme = "EXTERNAL"
+  ip_address            = google_compute_global_address.lb_ip.address
+}
+

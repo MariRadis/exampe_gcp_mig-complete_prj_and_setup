@@ -1,0 +1,28 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+*.class
+
+# macOS
+.DS_Store
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.tfvars
+terraform.tfvars
+
+
+# Ignore any local environment files
+.env
+.env.*
