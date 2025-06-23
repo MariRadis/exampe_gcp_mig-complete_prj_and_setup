@@ -32,12 +32,12 @@ resource "google_compute_region_instance_template" "web_template" {
 
   scheduling {
     provisioning_model = var.provisioning_model
-    preemptible       = var.preemptible
+    preemptible        = var.preemptible
     automatic_restart  = var.automatic_restart
   }
 
-  tags = var.network_tags
-  labels =var.labels
+  tags   = var.network_tags
+  labels = var.labels
   disk {
     boot         = true
     auto_delete  = true
@@ -51,7 +51,8 @@ resource "google_compute_region_instance_template" "web_template" {
   metadata_startup_script = var.startup_script
 
   metadata = {
-    enable-oslogin = "TRUE"
+    enable-oslogin     = "TRUE"
+    serial-port-enable = "true"
   }
 
   service_account {
@@ -63,7 +64,6 @@ resource "google_compute_region_instance_template" "web_template" {
     ]
   }
 }
-
 
 
 #Ensures instances are healthy before serving traffic.
@@ -81,15 +81,19 @@ resource "google_compute_health_check" "hc" {
 }
 
 
-
 resource "google_compute_region_instance_group_manager" "web_mig" {
-  name = "${var.base_instance_name}-mig"
+  name               = "${var.base_instance_name}-mig"
   base_instance_name = var.base_instance_name
-  region = var.region
+  region             = var.region
   version {
     instance_template = google_compute_region_instance_template.web_template.id
   }
-
+  update_policy {
+    type = "PROACTIVE"       # Roll out changes immediately
+    minimal_action = "REPLACE"         # Replace VMs
+    max_surge_fixed = 3              # Allow 1 extra VM during update
+    max_unavailable_fixed = 0                 # Keep all existing VMs running
+  }
   named_port {
     name = "http"
     port = 80
@@ -103,7 +107,7 @@ resource "google_compute_region_instance_group_manager" "web_mig" {
 
 resource "google_compute_region_autoscaler" "web_autoscaler" {
   name   = "${var.base_instance_name}-autoscaler"
-  region   = var.region
+  region = var.region
   target = google_compute_region_instance_group_manager.web_mig.id
   autoscaling_policy {
     max_replicas = 5

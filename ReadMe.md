@@ -92,26 +92,12 @@ This project deploys a simple NGINX-based web application on Google Compute Engi
    exit
    ```
 
-   If SSH fails :
+```
+gcloud compute ssh web-nb7h  --project=whitelama  --zone=europe-west1-c   --tunnel-through-iap   --troubleshoot   --verbosity=debug
+```
 
-   1. Retry terraform apply to ensure firewall was deployed correctly.
-   2. Check that the VM is in a subnetwork with internet access (via NAT).
-   3.  If needed, manually add this firewall rule for SSH:
 
-   ```
-   resource "google_compute_firewall" "allow-ssh" {
-   name    = "allow-ssh"
-   network = var.network
-   
-   allow {
-   protocol = "tcp"
-   ports    = ["22"]
-   }
-   
-   source_ranges = [var.ssh_source_ip]
-   target_tags   = ["web"]
-   }
-   ```
+
 6. **Autoscaling**
 
 7. **Firewall**
