@@ -54,7 +54,7 @@ resource "google_compute_firewall" "allow-http" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags = var.tags
+  target_tags = var.network_tags
 }
 
 
@@ -68,5 +68,5 @@ resource "google_compute_firewall" "allow-ssh" {
   }
 
   source_ranges = ssh_source_ip
-  target_tags = var.tags
+  target_tags = var.network_tags
 }
