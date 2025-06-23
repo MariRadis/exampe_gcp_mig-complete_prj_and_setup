@@ -26,6 +26,10 @@ resource "google_compute_region_instance_template" "web_template" {
   machine_type = "e2-medium"
   region       = var.region
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   scheduling {
     provisioning_model = var.provisioning_model
     preemptible       = var.preemptible
@@ -97,11 +101,10 @@ resource "google_compute_region_instance_group_manager" "web_mig" {
 }
 
 
-resource "google_compute_autoscaler" "web_autoscaler" {
+resource "google_compute_region_autoscaler" "web_autoscaler" {
   name   = "${var.base_instance_name}-autoscaler"
-  zone   = var.zone
+  region   = var.region
   target = google_compute_region_instance_group_manager.web_mig.id
-
   autoscaling_policy {
     max_replicas = 5
     min_replicas = 1
