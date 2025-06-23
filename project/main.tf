@@ -27,6 +27,24 @@ resource "google_compute_router_nat" "nat" {
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
+resource "google_compute_firewall" "egress" {
+  name    = "allow-egress"
+  network = google_compute_network.vpc.name
+
+  direction = "EGRESS"
+  priority  = 1000
+  destination_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "443"]
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = ["53"]
+  }
+}
 
 #done
 resource "google_compute_firewall" "allow-http" {
