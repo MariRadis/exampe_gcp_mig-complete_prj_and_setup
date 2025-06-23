@@ -91,7 +91,7 @@ resource "google_compute_region_instance_group_manager" "web_mig" {
   }
 }
 
-#done
+
 resource "google_compute_autoscaler" "web_autoscaler" {
   name   = "${var.base_instance_name}-autoscaler"
   zone   = var.zone

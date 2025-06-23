@@ -34,7 +34,7 @@ variable "ssh_source_ip" {
   type        = string
 }
 
-variable "tags" {
+variable "network_tags" {
   description = "Network tags to associate with the VM instance template"
   type        = list(string)
 }
