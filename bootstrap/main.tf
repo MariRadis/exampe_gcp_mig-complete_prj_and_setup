@@ -24,6 +24,7 @@ resource "google_project_service" "enabled_apis" {
   for_each = toset([
     "compute.googleapis.com",
     "iam.googleapis.com",
+    "networkmanagement.googleapis.com"
   ])
 
   project            = google_project.project.project_id

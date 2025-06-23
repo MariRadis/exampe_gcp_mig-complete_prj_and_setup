@@ -60,7 +60,63 @@ This project deploys a simple NGINX-based web application on Google Compute Engi
    You should see NGINX serving:
    `Hello from <instance-hostname>`
 
-4. **Tear down the demo:**
+4. **Kill VM and wait to recreate**
+   1. We have 1 VM.
+      ```bash
+      gcloud compute instances list
+      # Replace <instance-name> and <zone> with values from:
+
+      gcloud compute instances delete web-nb7h  --zone=europe-west1-c --quiet
+      
+      ```
+   2. Shows :
+      1. mig recreating, vm auto heal https://console.cloud.google.com/compute/instanceGroups/list?hl=en&inv=1&invt=Ab06tQ&project=whitelama&supportedpurview=project,organizationId,folder
+      2. new VM appears https://console.cloud.google.com/compute/instances?hl=en&inv=1&invt=Ab06tQ&project=whitelama&supportedpurview=project,organizationId,folder
+      3. load balancer works
+      ```bash
+      echo "$(terraform output -raw http_url)"
+      ```
+
+
+
+5. **ssh** 
+      ```bash
+      gcloud compute instances list
+      gcloud compute ssh web-nb7h --zone=europe-west1-c
+
+      ```
+   Test inside the VM
+    ```bash
+   curl localhost
+   sudo systemctl status nginx
+   exit
+   ```
+
+   If SSH fails :
+
+   1. Retry terraform apply to ensure firewall was deployed correctly.
+   2. Check that the VM is in a subnetwork with internet access (via NAT).
+   3.  If needed, manually add this firewall rule for SSH:
+
+   ```
+   resource "google_compute_firewall" "allow-ssh" {
+   name    = "allow-ssh"
+   network = var.network
+   
+   allow {
+   protocol = "tcp"
+   ports    = ["22"]
+   }
+   
+   source_ranges = [var.ssh_source_ip]
+   target_tags   = ["web"]
+   }
+   ```
+6. **Autoscaling**
+
+7. **Firewall**
+
+8. **Tear down the demo:**
 
    ```bash
    ./destroy.sh
