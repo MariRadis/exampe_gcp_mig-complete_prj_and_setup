@@ -1,5 +1,5 @@
 
-````markdown
+
 # GCP Web App with Load Balancer (Terraform)
 
 This project deploys a simple NGINX-based web application on Google Compute Engine (GCE) instances behind a **Global HTTP Load Balancer**, using **Terraform** for full automation.
@@ -31,7 +31,7 @@ This project deploys a simple NGINX-based web application on Google Compute Engi
 │   └── load_balancer/      # Sets up backend service, URL map, proxy, forwarding rule
 ├── apply.sh
 └── destroy.sh
-````
+```
 
 ## 🚀 Usage
 
@@ -54,7 +54,7 @@ This project deploys a simple NGINX-based web application on Google Compute Engi
    After apply completes, open your browser to:
 
    ```bash
-   echo "http://$(terraform output -raw load_balancer_ip)"
+   echo "$(terraform output -raw http_url)"
    ```
 
    You should see NGINX serving:
