@@ -33,6 +33,9 @@ variable "base_instance_name" {
 
 variable "provisioning_model" {
 }
+
+variable "preemptible" {
+}
 variable "startup_script" {
   description = "Path to the startup script file"
   type        = string

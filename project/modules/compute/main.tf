@@ -25,7 +25,10 @@ resource "google_compute_region_instance_template" "web_template" {
   machine_type = "e2-medium"
   region       = var.region
 
-  scheduling {provisioning_model = var.provisioning_model}
+  scheduling {
+    provisioning_model = var.provisioning_model
+    preemptible       = var.preemptible
+  }
 
   tags = var.network_tags
   labels =var.labels
