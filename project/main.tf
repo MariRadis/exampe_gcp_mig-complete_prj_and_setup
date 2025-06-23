@@ -1,36 +1,31 @@
-module "compute" {
+
+module "vpc" {
+  source         = "./modules/vpc"
+  region         = var.region
+  vpc_name       = "webapp-vpc"
+  subnet_name    = "webapp-subnet"
+  ip_cidr_range  = "10.10.0.0/24"
+  router_name    = "web-nat-router"
+  nat_name       = "web-nat-config"
+}
+
+module "compute_mig_nginx" {
   source              = "./modules/compute"
   project_id          = var.project_id
   region              = var.region
   zone                = var.zone
 
-  name_prefix         = "web-template"
-  machine_type        = "e2-medium"
   tags                = ["web"]
   labels              = {
     environment = "dev"
     app         = "web"
+    deployed-by = "terraform"
   }
-  source_image        = "debian-cloud/debian-12"
   subnetwork_id       = module.vpc.subnet_id
-  startup_script_path = "startup-script.sh"
+}
 
-  # Service account
-  sa_account_id       = "vm-app-access"
-  sa_display_name     = "Service Account for VM Access"
-  sa_roles = [
-    "roles/storage.objectViewer",
-    "roles/iam.serviceAccountUser",
-    "roles/monitoring.metricWriter",
-    "roles/logging.logWriter"
-  ]
-  scopes = [
-    "https://www.googleapis.com/auth/devstorage.read_only",
-    "https://www.googleapis.com/auth/logging.write",
-    "https://www.googleapis.com/auth/monitoring.write"
-  ]
-
-  mig_name            = "web-mig"
-  base_instance_name  = "web"
-  autoscaler_name     = "web-autoscaler"
+module "load_balancer" {
+  source            = "./modules/load_balancer"
+  instance_group    = module.compute_mig_nginx.instance_group
+  health_check_id   = module.compute_mig_nginx.health_check_id
 }

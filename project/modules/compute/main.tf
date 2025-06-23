@@ -17,6 +17,7 @@ resource "google_project_iam_member" "vm_sa_roles" {
   member  = "serviceAccount:${google_service_account.vm_sa.email}"
 }
 #done
+
 resource "google_compute_region_instance_template" "web_template" {
 
   name_prefix  = "web-template"
@@ -34,7 +35,7 @@ resource "google_compute_region_instance_template" "web_template" {
   }
 
   network_interface {
-    subnetwork = google_compute_subnetwork.subnet.id
+    subnetwork = var.subnet_id
   }
 
   metadata_startup_script = file("startup-script.sh")

@@ -43,6 +43,3 @@ resource "google_compute_global_forwarding_rule" "http_forwarding_rule" {
   ip_address            = google_compute_global_address.lb_ip.address
 }
 
-output "http_url" {
-  value = "http://${google_compute_global_address.lb_ip.address}"
-}
