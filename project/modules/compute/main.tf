@@ -1,0 +1,108 @@
+#done
+resource "google_service_account" "vm_sa" {
+  account_id   = "vm-app-access"
+  display_name = "Service Account for VM Access"
+}
+#done
+resource "google_project_iam_member" "vm_sa_roles" {
+  for_each = toset([
+    "roles/storage.objectViewer",
+    "roles/iam.serviceAccountUser",
+    "roles/monitoring.metricWriter",
+    "roles/logging.logWriter"
+  ])
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${google_service_account.vm_sa.email}"
+}
+#done
+resource "google_compute_region_instance_template" "web_template" {
+
+  name_prefix  = "web-template"
+  machine_type = "e2-medium"
+  region       = "europe-west-1"
+
+  scheduling {provisioning_model = "spot"}
+
+  tags = ["web"]
+  labels = ["web", "deployed-from-terraform", "dev"] # this sholud be given as input values
+  disk {
+    boot         = true
+    auto_delete  = true
+    source_image = "debian-cloud/debian-12"
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.subnet.id
+  }
+
+  metadata_startup_script = file("startup-script.sh")
+  metadata = {
+    enable-oslogin = "TRUE"  # TODO check why this
+  }
+
+  service_account {
+    email = google_service_account.vm_sa.email
+    scopes = [
+      "https://www.googleapis.com/auth/devstorage.read_only", "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring.write"
+    ]
+  }
+}
+
+
+
+#Ensures instances are healthy before serving traffic.
+resource "google_compute_health_check" "hc" {
+  name = "web-health-check"
+
+  http_health_check {
+    port = 80
+  }
+
+  check_interval_sec  = 10
+  timeout_sec         = 5
+  healthy_threshold   = 2
+  unhealthy_threshold = 2
+}
+#done
+resource "google_compute_region_instance_group_manager" "web_mig" {
+  name               = "web-mig"
+  base_instance_name = "web"
+  region = "europe-west1"
+  version {
+    instance_template = google_compute_region_instance_template.web_template.id
+  }
+
+  named_port {
+    name = "http"
+    port = 80
+  }
+  auto_healing_policies {
+    health_check      = google_compute_health_check.hc.id
+    initial_delay_sec = 90
+  }
+}
+
+#done
+resource "google_compute_autoscaler" "web_autoscaler" {
+  name   = "web-autoscaler"
+  zone   = var.zone
+  target = google_compute_region_instance_group_manager.web_mig.id
+
+  autoscaling_policy {
+    max_replicas = 5
+    min_replicas = 1
+
+    cpu_utilization {
+      target = 0.6
+    }
+
+    load_balancing_utilization {
+      target = 0.6
+    }
+
+    cooldown_period = 90  # cold start web-app. Needs to be same as initial_delay_sec
+  }
+}
