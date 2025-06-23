@@ -21,7 +21,7 @@ override.tf.json
 *_override.tf.json
 .terraform.tfvars
 terraform.tfvars
-
+somefile.tfplan
 
 # Ignore any local environment files
 .env
