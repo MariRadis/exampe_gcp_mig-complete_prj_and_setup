@@ -23,7 +23,7 @@ resource "google_compute_region_instance_template" "web_template" {
 
   name_prefix  = "${var.base_instance_name}-template"
   machine_type = "e2-medium"
-  region       = "europe-west-1"
+  region       = var.region
 
   scheduling {provisioning_model = var.provisioning_model}
 

@@ -1,3 +1,13 @@
+#Responsibilities:
+#Create GCP project
+#
+#Link to billing
+#
+#Enable APIs
+#
+# terraform deployment service account to be used in terraform deployment
+
+
 import {
   id = var.project_id
   to = google_project.project
@@ -58,19 +68,4 @@ resource "google_storage_bucket" "terraform_state" {
 
   uniform_bucket_level_access = true
 }
-#Responsibilities:
-#Create GCP project
-#
-#Link to billing
-#
-#Enable APIs
-#
-#Create Terraform service account (and grant IAM roles)
-#roles/compute.admin	Full control over Compute Engine resources (instances, templates, MIGs, load balancers)
-#roles/compute.networkAdmin	Manage networks, subnets, and firewalls
-#roles/iam.serviceAccountUser	Attach service accounts (like vm_sa) to VMs and templates
-#roles/monitoring.viewer	Needed if autoscaler or instance health policies inspect metrics
-#
-#Create state bucket
-#
-#Output service account email & project ID
+

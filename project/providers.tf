@@ -13,5 +13,5 @@ provider "google" {
   project                     = data.terraform_remote_state.bootstrap.outputs.project_id
   region                      = var.region
   zone                        = var.zone
-  impersonate_service_account = data.terraform_remote_state.bootstrap.outputs.terraform_sa_email
+  # impersonate_service_account = data.terraform_remote_state.bootstrap.outputs.terraform_sa_email todo did not have time
 }
