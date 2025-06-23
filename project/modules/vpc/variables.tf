@@ -12,25 +12,21 @@ variable "vpc_name" {
 variable "subnet_name" {
   description = "The name of the subnetwork."
   type        = string
-  default     = "webapp-subnet"
 }
 
 variable "ip_cidr_range" {
   description = "The IP CIDR range for the subnetwork."
   type        = string
-  default     = "10.10.0.0/24"
 }
 
 variable "router_name" {
   description = "The name of the NAT router."
   type        = string
-  default     = "web-nat-router"
 }
 
 variable "nat_name" {
   description = "The name of the NAT configuration."
   type        = string
-  default     = "web-nat-config"
 }
 
 variable "ssh_source_ip" {
@@ -39,5 +35,6 @@ variable "ssh_source_ip" {
 }
 
 variable "tags" {
-
+  description = "Network tags to associate with the VM instance template"
+  type        = list(string)
 }

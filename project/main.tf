@@ -7,6 +7,8 @@ module "vpc" {
   ip_cidr_range  = "10.10.0.0/24"
   router_name    = "web-nat-router"
   nat_name       = "web-nat-config"
+  ssh_source_ip = [var.ssh_source_ip]
+  network_tags                = ["web"]
 }
 
 module "compute_mig_nginx" {
@@ -15,13 +17,25 @@ module "compute_mig_nginx" {
   region              = var.region
   zone                = var.zone
 
-  tags                = ["web"]
+  network_tags                = ["web"]
   labels              = {
     environment = "dev"
     app         = "web"
     deployed-by = "terraform"
   }
-  subnetwork_id       = module.vpc.subnet_id
+  subnet_id       = module.vpc.subnet_id
+  base_instance_name = "web"
+  provisioning_model = "spot"
+
+  startup_script = <<-EOT
+#!/bin/bash
+apt-get update
+apt-get install -y nginx
+systemctl enable nginx
+systemctl start nginx
+echo "Hello from $(hostname)" > /var/www/html/index.nginx-debian.html
+EOT
+
 }
 
 module "load_balancer" {

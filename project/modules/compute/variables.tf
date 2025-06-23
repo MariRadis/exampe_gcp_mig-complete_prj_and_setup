@@ -8,25 +8,32 @@ variable "zone" {
   type        = string
 }
 
-variable "subnetwork_id" {
-  description = "The ID of the subnetwork to associate with the instance template."
-  type        = string
-}
-
-variable "startup_script_path" {
-  description = "Path to the startup script file."
-  type        = string
-}
 
 variable "labels" {
   description = "Labels to apply to the instance template."
   type        = map(string)
 }
 
-# These are hardcoded in the resource block, but can be turned into variables if needed:
-# name_prefix, machine_type, region, source_image, tags, etc.
-
-
 variable "subnet_id" {
-  default = ""
+  description = "The ID of the subnetwork to associate with the instance template."
+}
+
+variable "region" {
+}
+
+variable "network_tags" {
+  description = "Network tags to associate with the VM instance template"
+  type        = list(string)
+}
+
+variable "base_instance_name" {
+  type = string
+
+}
+
+variable "provisioning_model" {
+}
+variable "startup_script" {
+  description = "Path to the startup script file"
+  type        = string
 }

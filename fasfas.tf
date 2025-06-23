@@ -92,7 +92,7 @@ resource "google_compute_region_instance_template" "web_template" {
 
   metadata_startup_script = file("startup-script.sh")
   metadata = {
-    enable-oslogin = "TRUE"  # TODO check why this
+    enable-oslogin = "TRUE"
   }
 
   service_account {

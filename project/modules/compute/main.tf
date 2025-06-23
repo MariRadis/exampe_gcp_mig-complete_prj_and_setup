@@ -1,6 +1,6 @@
 #done
 resource "google_service_account" "vm_sa" {
-  account_id   = "vm-app-access"
+  account_id   = "${var.base_instance_name}-vm-app-access"
   display_name = "Service Account for VM Access"
 }
 #done
@@ -18,16 +18,17 @@ resource "google_project_iam_member" "vm_sa_roles" {
 }
 #done
 
+
 resource "google_compute_region_instance_template" "web_template" {
 
-  name_prefix  = "web-template"
+  name_prefix  = "${var.base_instance_name}-template"
   machine_type = "e2-medium"
   region       = "europe-west-1"
 
-  scheduling {provisioning_model = "spot"}
+  scheduling {provisioning_model = var.provisioning_model}
 
-  tags = ["web"]
-  labels = ["web", "deployed-from-terraform", "dev"] # this sholud be given as input values
+  tags = var.network_tags
+  labels =var.labels
   disk {
     boot         = true
     auto_delete  = true
@@ -38,15 +39,17 @@ resource "google_compute_region_instance_template" "web_template" {
     subnetwork = var.subnet_id
   }
 
-  metadata_startup_script = file("startup-script.sh")
+  metadata_startup_script = var.startup_script
+
   metadata = {
-    enable-oslogin = "TRUE"  # TODO check why this
+    enable-oslogin = "TRUE"
   }
 
   service_account {
     email = google_service_account.vm_sa.email
     scopes = [
-      "https://www.googleapis.com/auth/devstorage.read_only", "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring.write"
     ]
   }
@@ -56,7 +59,7 @@ resource "google_compute_region_instance_template" "web_template" {
 
 #Ensures instances are healthy before serving traffic.
 resource "google_compute_health_check" "hc" {
-  name = "web-health-check"
+  name = "${var.base_instance_name}-health-check"
 
   http_health_check {
     port = 80
@@ -67,11 +70,13 @@ resource "google_compute_health_check" "hc" {
   healthy_threshold   = 2
   unhealthy_threshold = 2
 }
-#done
+
+
+
 resource "google_compute_region_instance_group_manager" "web_mig" {
-  name               = "web-mig"
-  base_instance_name = "web"
-  region = "europe-west1"
+  name = "${var.base_instance_name}-mig"
+  base_instance_name = var.base_instance_name
+  region = var.region
   version {
     instance_template = google_compute_region_instance_template.web_template.id
   }
@@ -88,7 +93,7 @@ resource "google_compute_region_instance_group_manager" "web_mig" {
 
 #done
 resource "google_compute_autoscaler" "web_autoscaler" {
-  name   = "web-autoscaler"
+  name   = "${var.base_instance_name}-autoscaler"
   zone   = var.zone
   target = google_compute_region_instance_group_manager.web_mig.id
 
