@@ -25,8 +25,9 @@ module "compute_mig_nginx" {
   }
   subnet_id       = module.vpc.subnet_id
   base_instance_name = "web"
-  provisioning_model = "spot"
-  preemptible = true
+  provisioning_model = "STANDARD"
+  preemptible = false
+  automatic_restart= true
   startup_script = <<-EOT
 #!/bin/bash
 apt-get update

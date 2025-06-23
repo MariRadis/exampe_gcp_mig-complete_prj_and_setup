@@ -19,6 +19,7 @@ resource "google_project_iam_member" "vm_sa_roles" {
 #done
 
 
+
 resource "google_compute_region_instance_template" "web_template" {
 
   name_prefix  = "${var.base_instance_name}-template"
@@ -28,6 +29,7 @@ resource "google_compute_region_instance_template" "web_template" {
   scheduling {
     provisioning_model = var.provisioning_model
     preemptible       = var.preemptible
+    automatic_restart  = var.automatic_restart
   }
 
   tags = var.network_tags

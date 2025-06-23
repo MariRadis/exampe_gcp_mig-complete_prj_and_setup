@@ -40,3 +40,5 @@ variable "startup_script" {
   description = "Path to the startup script file"
   type        = string
 }
+variable "automatic_restart" {
+}
