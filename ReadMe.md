@@ -1,6 +1,7 @@
 # GCP Web App with Load Balancer (Terraform)
 
-This project deploys a simple NGINX-based web application on multiple Google Compute Engine (GCE) instances behind a global HTTP Load Balancer using Infrastructure as Code with Terraform.
+This project deploys a simple NGINX-based web application on multiple Google Compute Engine (GCE) instances behind a 
+global HTTP Load Balancer using Infrastructure as Code with Terraform.
 
 ## Features
 
