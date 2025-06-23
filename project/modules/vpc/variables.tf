@@ -29,11 +29,12 @@ variable "nat_name" {
   type        = string
 }
 
-variable "ssh_source_ip" {
-  description = "Your public IP address to allow SSH access, in CIDR format (e.g. 1.2.3.4/32)."
-  type        = string
-}
 
+
+variable "source_ranges" {
+  description = "Source ip address that are allowed for ssh to VMs"
+  type        = list(string)
+}
 variable "network_tags" {
   description = "Network tags to associate with the VM instance template"
   type        = list(string)

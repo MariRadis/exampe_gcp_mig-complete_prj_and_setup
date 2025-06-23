@@ -67,6 +67,6 @@ resource "google_compute_firewall" "allow-ssh" {
     ports = ["22"]
   }
 
-  source_ranges = ssh_source_ip
+  source_ranges = var.source_ranges
   target_tags = var.network_tags
 }

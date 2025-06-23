@@ -7,7 +7,7 @@ module "vpc" {
   ip_cidr_range  = "10.10.0.0/24"
   router_name    = "web-nat-router"
   nat_name       = "web-nat-config"
-  ssh_source_ip = [var.ssh_source_ip]
+  source_ranges = [var.ssh_source_ip]
   network_tags                = ["web"]
 }
 

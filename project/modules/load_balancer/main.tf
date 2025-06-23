@@ -9,11 +9,11 @@ resource "google_compute_backend_service" "web_backend" {
   load_balancing_scheme = "EXTERNAL"
   protocol              = "HTTP"
   port_name             = "http"
-  health_checks = [google_compute_health_check.hc.id] #Ensures instances are healthy before serving traffic.
+  health_checks = [var.health_check_id] #Ensures instances are healthy before serving traffic.
   timeout_sec           = 10
 
   backend {
-    group = google_compute_region_instance_group_manager.web_mig.instance_group
+    group = var.instance_group
   }
 }
 
