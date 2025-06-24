@@ -82,7 +82,7 @@ This project deploys a simple NGINX-based web application on Google Compute Engi
 5. **ssh and firewall** 
       ```bash
       gcloud compute instances list
-      gcloud compute ssh web-4g99 --tunnel-through-iap --project=whitelama --zone=europe-west1-c --troubleshoot   --verbosity=debug
+      gcloud compute ssh web-4g99 --tunnel-through-iap --project=whitelama --zone=europe-west1-c #--troubleshoot   --verbosity=debug
 
       ```
    Test inside the VM
@@ -111,7 +111,8 @@ https://console.cloud.google.com/security/iap?hl=en&inv=1&invt=Ab06tQ&orgonly=tr
 Use Apache Benchmark (ab) or similar:
 
 ```
-ab -n 10000 -c 100 echo "$(terraform output -raw http_url)"
+ab -n 10000 -c 100 http://35.244.193.90/
+
 ``` 
 Sends 10,000 requests with 100 concurrent clients.
 
