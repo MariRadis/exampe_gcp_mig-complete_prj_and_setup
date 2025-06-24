@@ -76,8 +76,8 @@ resource "google_compute_health_check" "hc" {
 
   check_interval_sec  = 10
   timeout_sec         = 5
-  healthy_threshold   = 2
-  unhealthy_threshold = 2
+  healthy_threshold   = 3
+  unhealthy_threshold = 5
 }
 
 

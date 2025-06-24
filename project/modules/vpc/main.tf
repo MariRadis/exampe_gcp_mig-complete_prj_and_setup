@@ -44,29 +44,37 @@ resource "google_compute_firewall" "egress" {
   }
 }
 
-resource "google_compute_firewall" "allow-http" {
-  name    = "allow-http"
+
+
+resource "google_compute_firewall" "allow-lb-http" {
+  name    = "allow-lb-http"
   network = google_compute_network.vpc.name
+
+  direction     = "INGRESS"
+  priority      = 1000
+  source_ranges = ["0.0.0.0/0"]  # Required for LB health checks and traffic todo
+
+  target_tags   = var.network_tags
 
   allow {
     protocol = "tcp"
-    ports = ["80"]
+    ports    = ["80","443"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
-  target_tags = var.network_tags
+  description = "Allow HTTP traffic from GCP HTTP Load Balancer to backend"
 }
-
-
-resource "google_compute_firewall" "allow-ssh" {
-  name    = "allow-ssh"
+resource "google_compute_firewall" "allow-iap-ssh" {
+  name    = "allow-iap-ssh"
   network = google_compute_network.vpc.name
+
+  direction     = "INGRESS"
+  source_ranges = ["35.235.240.0/20"]  # IAP TCP tunneling range
+  target_tags   = var.network_tags
 
   allow {
     protocol = "tcp"
-    ports = ["22"]
+    ports    = ["22"]
   }
 
-  source_ranges = var.source_ranges
-  target_tags = var.network_tags
+  description = "Allow IAP to SSH into instances"
 }

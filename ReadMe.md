@@ -79,30 +79,54 @@ This project deploys a simple NGINX-based web application on Google Compute Engi
 
 
 
-5. **ssh** 
+5. **ssh and firewall** 
       ```bash
       gcloud compute instances list
-      gcloud compute ssh web-nb7h --zone=europe-west1-c
+      gcloud compute ssh web-4g99 --tunnel-through-iap --project=whitelama --zone=europe-west1-c --troubleshoot   --verbosity=debug
 
       ```
    Test inside the VM
     ```bash
    curl localhost
    sudo systemctl status nginx
+   ping google.com # nat
    exit
    ```
+   test ports
+   ```bash
+   nc -zv 35.244.193.90 22         # SSH port
+   nc -zv 35.244.193.90 80         # HTTP
+   nc -zv 35.244.193.90 443        # HTTPS
+   ```
 
-```
-gcloud compute ssh web-nb7h  --project=whitelama  --zone=europe-west1-c   --tunnel-through-iap   --troubleshoot   --verbosity=debug
-```
 
+🟡 Manual Step Required
+https://console.cloud.google.com/security/iap?hl=en&inv=1&invt=Ab06tQ&orgonly=true&project=whitelama&supportedpurview=organizationId
 
 
 6. **Autoscaling**
+   HTTP Request Load
+   Get external IP of Load Balancer (or VM directly if public).
 
-7. **Firewall**
+Use Apache Benchmark (ab) or similar:
 
-8. **Tear down the demo:**
+```
+ab -n 10000 -c 100 echo "$(terraform output -raw http_url)"
+``` 
+Sends 10,000 requests with 100 concurrent clients.
+
+Watch the MIG:
+```
+gcloud compute instance-groups list
+gcloud compute instance-groups managed list-instances \
+<mig-name> --region=<region>
+```
+
+
+
+
+
+7. **Tear down the demo:**
 
    ```bash
    ./destroy.sh
