@@ -111,7 +111,9 @@ https://console.cloud.google.com/security/iap?hl=en&inv=1&invt=Ab06tQ&orgonly=tr
 Use Apache Benchmark (ab) or similar:
 
 ```
-ab -n 10000 -c 100 http://35.244.193.90/
+ab -n 10000 -c 20 http://35.244.193.90/
+
+Increase c gradually
 
 ``` 
 Sends 10,000 requests with 100 concurrent clients.
