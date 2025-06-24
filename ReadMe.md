@@ -94,13 +94,13 @@ This project deploys a simple NGINX-based web application on Google Compute Engi
    ```
    test ports
    ```bash
-   nc -zv 35.244.193.90 22         # SSH port
+   nc -zv 35.244.193.90 22         # SSH port  #  ["35.235.240.0/20"]  # IAP TCP tunneling range
    nc -zv 35.244.193.90 80         # HTTP
    nc -zv 35.244.193.90 443        # HTTPS
    ```
 
 
-🟡 Manual Step Required
+Manual Step Required
 https://console.cloud.google.com/security/iap?hl=en&inv=1&invt=Ab06tQ&orgonly=true&project=whitelama&supportedpurview=organizationId
 
 
